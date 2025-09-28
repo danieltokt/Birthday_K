@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка личности</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 90, 111, 0.4);
+        }
+
+        .error-page {
+            text-align: center;
+        }
+
+        .error-image {
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .error-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 13px;
+        }
+
+        .error-text {
+            color: #ff6b6b;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .birthday-page {
+            text-align: center;
+            animation: celebration 2s ease-in-out;
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .birthday-title {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+        }
+
+        .birthday-photo {
+            width: 250px;
+            height: 250px;
+            border-radius: 20px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 215, 0, 0.8);
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: photoGlow 3s ease-in-out infinite;
+        }
+
+        .birthday-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 17px;
+        }
+
+        .photo-placeholder {
+            color: rgba(255, 215, 0, 0.8);
+            font-size: 16px;
+            text-align: center;
+            padding: 20px;
+            line-height: 1.4;
+        }
+
+        @keyframes photoGlow {
+            0%, 100% { box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 12px 40px rgba(255, 215, 0, 0.6); }
+        }
+
+        .birthday-message {
+            color: white;
+            font-size: 20px;
+            line-height: 1.6;
+            margin: 30px 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            pointer-events: none;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotateZ(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotateZ(720deg);
+                opacity: 0;
+            }
+        }
+
+        .try-again {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            margin-top: 20px;
+        }
+
+        .try-again:hover {
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .cake {
+            font-size: 4em;
+            margin: 20px 0;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        /* Эффекты фейерверков */
+        .firework {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1001;
+        }
+
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Звуковая кнопка */
+        .sound-button {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            margin: 10px;
+        }
+
+        .sound-button:hover {
+            box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4);
+        }
+
+        /* Анимация звуковых волн */
+        .sound-waves {
+            display: inline-block;
+            margin-left: 10px;
+            animation: sound-pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes sound-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* Стили для загрузки фото - удалены */
+    </style>
+</head>
+<body>
+    <!-- Страница проверки -->
+    <div class="container">
+        <div id="verification-page" class="page active">
+            <h1>Проверка на беач🔐</h1>
+            <form id="verification-form">
+                <div class="form-group">
+                    <label for="name">Введите ваше имя:</label>
+                    <input type="text" id="name" name="name" placeholder="Например Дэрил🫦"required>
+                </div>
+                <div class="form-group">
+                    <label for="birthdate">Введите дату рождения:</label>
+                    <input type="text" id="birthdate" name="birthdate" placeholder="(для особо одаренных:день,месяц и год🙄)" required>
+                </div>
+                <button type="submit">Проверить💅🏿</button>
+            </form>
+            
+
+        </div>
+
+        <!-- Страница ошибки -->
+        <div id="error-page" class="page error-page">
+            <h2>❌ Доступ запрещен</h2>
+            <div class="error-image" id="error-image-container">
+                <div class="photo-placeholder">
+                    Здесь будет фото нарушителя<br>
+                    (разместите файл "error_photo.jpg" в той же папке)
+                </div>
+            </div>
+            <div class="error-text">Ты не ,БЕАЧ!</div>
+            <button class="try-again" onclick="goBack()">Попробовать снова🥸</button>
+        </div>
+
+        <!-- Страница поздравления -->
+        <div id="birthday-page" class="page birthday-page">
+            <h1 class="birthday-title">🎉 С Днем Рождения! 🎉</h1>
+            <div class="birthday-photo" id="birthday-photo-container">
+                <div class="photo-placeholder">
+                    📸 Фото именинницы<br>
+                    (разместите файл "kurmanzan_photo.jpg" в той же папке)
+                </div>
+            </div>
+            <div class="cake">🎂</div>
+            <div class="birthday-message">
+                <strong>Дорогая Курманжан</strong><br><br>
+                Поздравляем тебя с днем рождения!<br>
+                Желаю тебе счастья, крепкого здоровья, благополучия, исполнения всех мечт и желаний, работы мечты, денег и успехов во всех начинаниях!<br>
+                Я очень рад, что мы подружились и провели учебные года незабываемо. Было очень весело, смешно и здоворово. Я никогда не забуду тех моментов, как мы играли в игры, дурачились, осуждали всех, сплетничали и орали кто громче.<br>
+                Надеюсь в будущем мы не перстанем дружить и будем также сходить с ума.
+                Пусть этот новый год жизни принесет много радости и исполнения твоих желаний!<br><br>
+                <em>🌟 Сегодня твой день! Желаю провести его весело и отлично 🌟</em>
+            </div>
+            <button onclick="launchFireworks()" class="sound-button">
+                Запустить салют 🎊 <span class="sound-waves">💥</span>
+            </button>
+            <button onclick="playHappyBirthdaySong()" class="sound-button music-button">
+                Включить музыку 🎵<span class="sound-waves">🎶</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Хранение загруженных фотографий - удалено, теперь используем файлы
+
+        // Звуковые эффекты и музыка
+        let audioContext;
+        let isPlayingMusic = false;
+        let birthdayAudio = null;
+
+        // Инициализация аудио
+        function initBirthdayAudio() {
+            if (!birthdayAudio) {
+                birthdayAudio = new Audio('HAPPY-Birthday-Song-Happy-Birthday-to-You.m4a');
+                birthdayAudio.loop = false;
+                birthdayAudio.volume = 0.7;
+            }
+        }
+
+        // Воспроизведение настоящей песни
+        function playHappyBirthdaySong() {
+            initBirthdayAudio();
+            
+            if (isPlayingMusic) {
+                // Если музыка играет, останавливаем
+                birthdayAudio.pause();
+                birthdayAudio.currentTime = 0;
+                isPlayingMusic = false;
+                updateMusicButton();
+                return;
+            }
+            
+            birthdayAudio.play().then(() => {
+                isPlayingMusic = true;
+                updateMusicButton();
+            }).catch(error => {
+                console.log('Не удалось воспроизвести файл HAPPY-Birthday-Song-Happy-Birthday-to-You.m4a');
+                console.log('Проверьте, что файл находится в той же папке');
+                // Fallback на синтезированную мелодию
+                playHappyBirthday();
+            });
+            
+            birthdayAudio.onended = () => {
+                isPlayingMusic = false;
+                updateMusicButton();
+            };
+        }
+
+        // Обновление текста кнопки музыки
+        function updateMusicButton() {
+            const musicButton = document.querySelector('.music-button');
+            if (musicButton) {
+                if (isPlayingMusic) {
+                    musicButton.innerHTML = '⏸️ Остановить музыку <span class="sound-waves">🎶</span>';
+                } else {
+                    musicButton.innerHTML = '🎵 Включить музыку <span class="sound-waves">🎶</span>';
+                }
+            }
+        }
+
+        // Функция для загрузки фотографии поздравления
+        function loadBirthdayPhoto() {
+            const photoContainer = document.getElementById('birthday-photo-container');
+            const img = new Image();
+            
+            img.onload = function() {
+                photoContainer.innerHTML = '<img src="kurmanzan_photo.jpg" alt="Фото Курманжан">';
+            };
+            
+            img.onerror = function() {
+                // Если фото не найдено, оставляем placeholder
+                console.log('Фото kurmanzan_photo.jpg не найдено');
+            };
+            
+            img.src = 'kurmanzan_photo.jpg';
+        }
+
+        // Функция для загрузки фотографии ошибки
+        function loadErrorPhoto() {
+            const photoContainer = document.getElementById('error-image-container');
+            const img = new Image();
+            
+            img.onload = function() {
+                photoContainer.innerHTML = '<img src="error_photo.jpg" alt="Фото нарушителя">';
+            };
+            
+            img.onerror = function() {
+                // Если фото не найдено, оставляем placeholder
+                console.log('Фото error_photo.jpg не найдено');
+            };
+            
+            img.src = 'error_photo.jpg';
+        }
+
+        // Новый звук взрыва салюта
+        function playFireworkSound() {
+            initAudio();
+            
+            // Создаем более реалистичный звук взрыва
+            const whiteNoise = audioContext.createBufferSource();
+            const buffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.5, audioContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            
+            // Генерируем белый шум
+            for (let i = 0; i < buffer.length; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            
+            whiteNoise.buffer = buffer;
+            
+            // Создаем фильтр для формирования звука взрыва
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(400, audioContext.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
+            
+            // Создаем усилитель для контроля громкости
+            const gainNode = audioContext.createGain();
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            // Соединяем все узлы
+            whiteNoise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            whiteNoise.start(audioContext.currentTime);
+            whiteNoise.stop(audioContext.currentTime + 0.5);
+            
+            // Добавляем эхо-эффект
+            setTimeout(() => {
+                const echo = audioContext.createBufferSource();
+                echo.buffer = buffer;
+                
+                const echoGain = audioContext.createGain();
+                echoGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                echoGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                const echoFilter = audioContext.createBiquadFilter();
+                echoFilter.type = 'lowpass';
+                echoFilter.frequency.setValueAtTime(200, audioContext.currentTime);
+                
+                echo.connect(echoFilter);
+                echoFilter.connect(echoGain);
+                echoGain.connect(audioContext.destination);
+                
+                echo.start(audioContext.currentTime);
+                echo.stop(audioContext.currentTime + 0.3);
+            }, 300);
+        }
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Расширенная мелодия "Happy Birthday" (резервная версия)
+        function playHappyBirthday() {
+            if (isPlayingMusic) return;
+            
+            initAudio();
+            isPlayingMusic = true;
+            
+            // Полная мелодия "Happy Birthday" со всеми куплетами
+            const melody = [
+                // "Happy Birthday to You"
+                {freq: 261.63, duration: 0.75}, // C
+                {freq: 261.63, duration: 0.25}, // C
+                {freq: 293.66, duration: 1},    // D
+                {freq: 261.63, duration: 1},    // C
+                {freq: 349.23, duration: 1},    // F
+                {freq: 329.63, duration: 2},    // E
+                {freq: 0, duration: 0.5},       // пауза
+                
+                // "Happy Birthday to You"
+                {freq: 261.63, duration: 0.75}, // C
+                {freq: 261.63, duration: 0.25}, // C
+                {freq: 293.66, duration: 1},    // D
+                {freq: 261.63, duration: 1},    // C
+                {freq: 392.00, duration: 1},    // G
+                {freq: 349.23, duration: 2},    // F
+                {freq: 0, duration: 0.5},       // пауза
+                
+                // "Happy Birthday dear [Name]"
+                {freq: 261.63, duration: 0.75}, // C
+                {freq: 261.63, duration: 0.25}, // C
+                {freq: 523.25, duration: 1},    // C (октава выше)
+                {freq: 440.00, duration: 1},    // A
+                {freq: 349.23, duration: 1},    // F
+                {freq: 329.63, duration: 1},    // E
+                {freq: 293.66, duration: 1.5},  // D
+                {freq: 0, duration: 0.5},       // пауза
+                
+                // "Happy Birthday to You"
+                {freq: 466.16, duration: 0.75}, // Bb
+                {freq: 466.16, duration: 0.25}, // Bb
+                {freq: 440.00, duration: 1},    // A
+                {freq: 349.23, duration: 1},    // F
+                {freq: 392.00, duration: 1},    // G
+                {freq: 349.23, duration: 2.5},  // F
+                {freq: 0, duration: 1},         // финальная пауза
+            ];
+            
+            let currentTime = 0;
+            
+            melody.forEach((note, index) => {
+                setTimeout(() => {
+                    if (note.freq > 0) { // Играем только если частота больше 0 (не пауза)
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(note.freq, audioContext.currentTime);
+                        oscillator.type = 'sine';
+                        
+                        // Плавное нарастание и затухание звука
+                        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                        gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.05);
+                        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + note.duration * 0.4 - 0.05);
+                        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + note.duration * 0.4);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + note.duration * 0.4);
+                    }
+                    
+                    if (index === melody.length - 1) {
+                        setTimeout(() => {
+                            isPlayingMusic = false;
+                        }, note.duration * 400);
+                    }
+                }, currentTime * 400);
+                
+                currentTime += note.duration;
+            });
+        }
+
+        function showPage(pageId) {
+            // Скрыть все страницы
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            // Показать нужную страницу
+            document.getElementById(pageId).classList.add('active');
+            
+            // Загрузить соответствующие фотографии
+            if (pageId === 'birthday-page') {
+                loadBirthdayPhoto();
+            } else if (pageId === 'error-page') {
+                loadErrorPhoto();
+            }
+        }
+
+        function goBack() {
+            showPage('verification-page');
+            // Очистить форму
+            document.getElementById('verification-form').reset();
+        }
+
+        // Крутые фейерверки
+        function launchFireworks() {
+            playFireworkSound();
+            
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff', '#ffd700'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.position = 'fixed';
+                    firework.style.left = Math.random() * window.innerWidth + 'px';
+                    firework.style.top = Math.random() * window.innerHeight + 'px';
+                    firework.style.width = '4px';
+                    firework.style.height = '4px';
+                    firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    firework.style.borderRadius = '50%';
+                    firework.style.boxShadow = `0 0 20px ${colors[Math.floor(Math.random() * colors.length)]}`;
+                    
+                    document.body.appendChild(firework);
+                    
+                    // Взрыв
+                    setTimeout(() => {
+                        for (let j = 0; j < 12; j++) {
+                            const particle = document.createElement('div');
+                            particle.className = 'particle';
+                            particle.style.position = 'fixed';
+                            particle.style.left = firework.style.left;
+                            particle.style.top = firework.style.top;
+                            particle.style.width = '3px';
+                            particle.style.height = '3px';
+                            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                            particle.style.borderRadius = '50%';
+                            particle.style.boxShadow = `0 0 10px ${particle.style.background}`;
+                            
+                            const angle = (j * 30) * Math.PI / 180;
+                            const velocity = 50 + Math.random() * 100;
+                            
+                            particle.animate([
+                                { transform: 'translate(0, 0)', opacity: 1 },
+                                { 
+                                    transform: `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity}px)`, 
+                                    opacity: 0 
+                                }
+                            ], {
+                                duration: 1000,
+                                easing: 'ease-out'
+                            });
+                            
+                            document.body.appendChild(particle);
+                            setTimeout(() => particle.remove(), 1000);
+                        }
+                        firework.remove();
+                    }, 500);
+                }, i * 200);
+            }
+        }
+
+        // Обработчик формы
+        document.getElementById('verification-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value.trim();
+            const birthdate = document.getElementById('birthdate').value.trim();
+            
+            // Проверка данных - исправленное имя "Курманжан"
+            if (name.toLowerCase() === 'курманжан' && birthdate === '29.09.2007') {
+                setTimeout(() => {
+                    showPage('birthday-page');
+                    // Автоматический запуск эффектов через 1 секунду
+                    setTimeout(() => {
+                        launchFireworks();
+                        setTimeout(() => {
+                            playHappyBirthdaySong();
+                        }, 1000);
+                    }, 1000);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    showPage('error-page');
+                }, 500);
+            }
+        });
+
+        // Анимация фона
+        function createBackgroundAnimation() {
+            const body = document.body;
+            const colors = [
+                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+            ];
+            
+            let currentColorIndex = 0;
+            
+            setInterval(() => {
+                currentColorIndex = (currentColorIndex + 1) % colors.length;
+                body.style.background = colors[currentColorIndex];
+            }, 10000);
+        }
+
+        // Запуск анимации фона
+        createBackgroundAnimation();
+    </script>
+</body>
+</html>
